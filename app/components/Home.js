@@ -1,32 +1,26 @@
+import fs  from 'fs';
+import path from 'path';
+import http from 'http';
+import request  from 'request';
+
 import React, { Component, PropTypes } from 'react';
 import { bindActionCreators } from 'redux';
 import { connect } from 'react-redux';
 import { Link } from 'react-router';
 
+import { remote } from 'electron';
+const dialog = remote.require('dialog');
+
 import styles from './Home.module.css';
 import * as ImagesActions from '../actions/images';
 import Image from './Image';
 
-import { remote } from 'electron';
-const dialog = remote.require('dialog');
-
-import fs  from 'fs';
-import path from 'path';
-import http from 'http';
-import request  from 'request';
 
 class Home extends Component {
   static propTypes = {
     loadImgurImages: PropTypes.func.isRequired,
     updateDownloadProgress: PropTypes.func.isRequired,
     imgur: PropTypes.object
-  }
-
-  constructor(props) {
-    super(props);
-    this.state = {
-      testProgress: 0
-    }
   }
 
   handleOnKeyDown = (e) => {
@@ -52,9 +46,7 @@ class Home extends Component {
       { properties: [ 'openDirectory', 'createDirectory' ]},
       (dirname) => {
         if (typeof(imgur.images) === 'undefined') {
-          // TODO
-          // notify user for enter imgur url
-          return
+          return;
         }
         imgur.images.map((image, index) => {
           var basename = path.basename(image.link);
@@ -64,10 +56,18 @@ class Home extends Component {
             var len = parseInt(response.headers['content-length'], 10);
 
             response.on('data', chunk => {
-              total += chunk.length
-              // console.log(`${image.id}: ${total/len}`);
-              updateDownloadProgress(image.id, total/len);
+              total += chunk.length;
+              var progress = parseInt(total/len * 100);
+
+              if (progress % 10 == 0) {
+                updateDownloadProgress(image.id, progress);
+              }
             });
+
+            response.on('end', () => {
+              updateDownloadProgress(image.id, 100);
+            });
+
           }).pipe(fs.createWriteStream(path.join(dirname[0], `${index+1}-${basename}`)));
 
         })
@@ -85,9 +85,6 @@ class Home extends Component {
             <input type="text" className={ styles.input }
               placeholder="paste imgur url here"
               onKeyDown={this.handleOnKeyDown}/>
-            <button className={styles.saveButton} onClick={this.testProgress}>
-              {'Test Progress'}
-            </button>
             <button className={styles.saveButton} onClick={this.handleSaveClick}>
               <i className="fa fa-cloud-download"/>
               {' Save'}

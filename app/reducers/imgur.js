@@ -9,10 +9,10 @@ export default function imgur(state = {}, action) {
         images: action.images
       }
     case UPDATE_DOWNLOAD_PROGRESS:
-      var image = state.images.find((image) => { return image.id == action.id })
-      var index = state.images.indexOf(image)
-      var images = state.images.slice()
-      images[index].progress = action.progress
+      var image = state.images.find((image) => { return image.id == action.id });
+      var index = state.images.indexOf(image);
+      var images = state.images.slice();
+      images[index].progress = action.progress;
 
       return {
         ...state,

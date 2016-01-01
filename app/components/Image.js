@@ -19,26 +19,29 @@
  * "account_url": null,
  * "account_id": null,
  * "comment_preview": null,
- * "link": "http://i.imgur.com/LPySUCH.png"
- * "thumbnail": "http://i.imgur.com/LPySUCHt.png"
- *
+ * "link": "http://i.imgur.com/LPySUCH.png",
+ * "thumbnail": "http://i.imgur.com/LPySUCHt.png",
+ * "progress": 0
  */
 
 import React, { Component } from 'react';
-import styles from './Image.module.css';
+import { Motion, spring } from 'react-motion';
+
 import { shell } from 'electron';
+
+import styles from './Image.module.css';
 
 export default class Image extends Component {
   constructor(props) {
     super(props);
-    this.state = { contentVisible: false}
+    this.state = { contentVisible: true }
   }
 
-  handleBoxClick() {
+  handleBoxClick = () => {
     this.setState({contentVisible: !this.state.contentVisible});
   }
 
-  handleLinkClick() {
+  handleLinkClick = () => {
     const { imageData } = this.props;
     shell.openExternal(imageData.link);
     setTimeout(() => {
@@ -50,10 +53,7 @@ export default class Image extends Component {
 
   render() {
     const { imageData } = this.props;
-
-    var backgroundImage = {
-      backgroundImage: `url(${imageData.thumbnail})`
-    }
+    var percentage = typeof imageData.progress === 'undefined' ? 0 : imageData.progress;
 
     var hiddenToggleStyle = {
       opacity: this.state.contentVisible ? 1 : 0,
@@ -61,13 +61,21 @@ export default class Image extends Component {
     }
 
     return(
-      <div className={styles.imageBox} onClick={this.handleBoxClick.bind(this)}>
-        <div className={styles.thumbnail} style={backgroundImage}/>
+      <div className={styles.imageBox} onClick={this.handleBoxClick}>
+        <div className={styles.thumbnail} style={{backgroundImage: `url(${imageData.thumbnail})`}}/>
+        <Motion style={{x: spring(percentage) }}>
+          {({x}) =>
+            <div className={styles.progress}
+                 style={{
+                   opacity: this.state.contentVisible ? 1 : 0,
+                   width: `${x}%`,
+                 }}/>
+          }
+        </Motion>
         <div className={styles.content} style={hiddenToggleStyle}>
           <div className={`${styles.title}`}>{imageData.title}</div>
           <div className="description">{imageData.description}</div>
-          <a onClick={this.handleLinkClick.bind(this)} className="link">{imageData.link}</a>
-          <div>{imageData.progress}</div>
+          <a onClick={this.handleLinkClick} className="link">{imageData.link}</a>
         </div>
       </div>
     )
