@@ -67,6 +67,7 @@ export default class Image extends Component {
           <div className={`${styles.title}`}>{imageData.title}</div>
           <div className="description">{imageData.description}</div>
           <a onClick={this.handleLinkClick.bind(this)} className="link">{imageData.link}</a>
+          <div>{imageData.progress}</div>
         </div>
       </div>
     )

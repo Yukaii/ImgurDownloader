@@ -140,8 +140,7 @@
     "redux": "^3.0.4",
     "redux-promise": "^0.5.0",
     "redux-thunk": "^1.0.0",
-    "request": "^2.67.0",
-    "request-progress": "^0.4.0"
+    "request": "^2.67.0"
   },
   "devEngines": {
     "node": "4.x || 5.x",

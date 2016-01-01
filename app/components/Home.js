@@ -12,16 +12,24 @@ const dialog = remote.require('dialog');
 
 import fs  from 'fs';
 import path from 'path';
+import http from 'http';
 import request  from 'request';
-import progress  from 'request-progress';
 
 class Home extends Component {
   static propTypes = {
     loadImgurImages: PropTypes.func.isRequired,
+    updateDownloadProgress: PropTypes.func.isRequired,
     imgur: PropTypes.object
   }
 
-  handleOnKeyDown(e) {
+  constructor(props) {
+    super(props);
+    this.state = {
+      testProgress: 0
+    }
+  }
+
+  handleOnKeyDown = (e) => {
     const { loadImgurImages } = this.props;
 
     if (e.key === 'Enter') {
@@ -32,34 +40,36 @@ class Home extends Component {
 
   renderImage(image) {
     return(
-      <Image imageData={ image } id={ image.id }/>
+      <Image key={image.id} imageData={ image } id={ image.id }/>
     );
   }
 
-  handleSaveClick() {
-    const { imgur } = this.props;
+  handleSaveClick = () => {
+    const { imgur, updateDownloadProgress } = this.props;
 
     dialog.showOpenDialog(
       remote.getCurrentWindow(),
       { properties: [ 'openDirectory', 'createDirectory' ]},
       (dirname) => {
+        if (typeof(imgur.images) === 'undefined') {
+          // TODO
+          // notify user for enter imgur url
+          return
+        }
         imgur.images.map((image, index) => {
           var basename = path.basename(image.link);
 
-          progress(request(image.link), {
-            lengthHeader: 'x-transfer-length'  // Length header to use, defaults to content-length
-          }).on('progress', state => {
-            // console.log(`received size in bytes`, state.received);
-            // The properties bellow can be null if response does not contain
-            // the content-length header
-            // console.log(`total size in bytes`, state.total);
-            // console.log(`percent`, state.percent);
-            // console.log(`eta`, state.eta);
-          }).on('error', err => {
-            console.error(err);
-          }).on('end', () => {
-            // handle done action
+          request.get(image.link).on('response', response => {
+            var total = 0;
+            var len = parseInt(response.headers['content-length'], 10);
+
+            response.on('data', chunk => {
+              total += chunk.length
+              // console.log(`${image.id}: ${total/len}`);
+              updateDownloadProgress(image.id, total/len);
+            });
           }).pipe(fs.createWriteStream(path.join(dirname[0], `${index+1}-${basename}`)));
+
         })
       }
     );
@@ -74,10 +84,13 @@ class Home extends Component {
           <div className={ styles.actionItems }>
             <input type="text" className={ styles.input }
               placeholder="paste imgur url here"
-              onKeyDown={ this.handleOnKeyDown.bind(this) }/>
-            <button className={styles.saveButton} onClick={this.handleSaveClick.bind(this)}>
+              onKeyDown={this.handleOnKeyDown}/>
+            <button className={styles.saveButton} onClick={this.testProgress}>
+              {'Test Progress'}
+            </button>
+            <button className={styles.saveButton} onClick={this.handleSaveClick}>
               <i className="fa fa-cloud-download"/>
-              {' Save to'}
+              {' Save'}
             </button>
           </div>
           <div className={ styles.albumContainer }>

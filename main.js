@@ -25,7 +25,12 @@ app.on('window-all-closed', () => {
 
 
 app.on('ready', () => {
-  mainWindow = new BrowserWindow({ useContentSize: true });
+  var windowOption = {};
+  windowOption = Object.assign(windowOption, {useContentSize: true});
+  if (process.env.NODE_ENV === 'production') {
+    windowOption = Object.assign(windowOption, {resizable: false});
+  }
+  mainWindow = new BrowserWindow(windowOption);
 
   if (process.env.HOT) {
     mainWindow.loadURL(`file://${__dirname}/app/hot-dev-app.html`);
