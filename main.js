@@ -10,6 +10,7 @@ const shell = electron.shell;
 let menu;
 let template;
 let mainWindow = null;
+var force_quit = false;
 
 
 crashReporter.start();
@@ -26,8 +27,17 @@ app.on('window-all-closed', () => {
 
 app.on('ready', () => {
   var windowOption = {};
-  windowOption = Object.assign(windowOption, {useContentSize: true});
-  if (process.env.NODE_ENV === 'production') {
+  windowOption =
+    Object.assign(
+      windowOption,
+      {
+        width: 645,
+        height: 500,
+        fullscreen: false,
+        center: true
+      }
+    );
+  if (process.env.NODE_ENV !== 'development') {
     windowOption = Object.assign(windowOption, {resizable: false});
   }
   mainWindow = new BrowserWindow(windowOption);
@@ -38,8 +48,15 @@ app.on('ready', () => {
     mainWindow.loadURL(`file://${__dirname}/app/app.html`);
   }
 
-  mainWindow.on('closed', () => {
-    mainWindow = null;
+  mainWindow.on('close', (e) => {
+    if (!force_quit) {
+      e.preventDefault();
+      mainWindow.hide();
+    }
+  });
+
+  app.on('activate', function(){
+    mainWindow.show();
   });
 
   if (process.env.NODE_ENV === 'development') {
@@ -76,6 +93,7 @@ app.on('ready', () => {
         label: 'Quit',
         accelerator: 'Command+Q',
         click() {
+          force_quit = true;
           app.quit();
         }
       }]

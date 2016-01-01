@@ -59,7 +59,7 @@ class Home extends Component {
               total += chunk.length;
               var progress = parseInt(total/len * 100);
 
-              if (progress % 10 == 0) {
+              if (progress % 10 < 3) {
                 updateDownloadProgress(image.id, progress);
               }
             });
