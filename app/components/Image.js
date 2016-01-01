@@ -68,7 +68,7 @@ export default class Image extends Component {
             <div className={styles.progress}
                  style={{
                    opacity: this.state.contentVisible ? 1 : 0,
-                   width: `${x}%`,
+                   width: `${100-x}%`,
                  }}/>
           }
         </Motion>

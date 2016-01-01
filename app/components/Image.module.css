@@ -44,6 +44,7 @@
 .progress {
   height: 100%;
   position: absolute;
+  right: 0;
 
   background-color: rgba(244, 178, 178, 0.6);
   z-index: 2;

@@ -8,9 +8,13 @@ Special thanks to [electron-react-boilerplate](https://github.com/chentsulin/ele
 ## Screenshot
 
 ![](doc/preview01.png)
+![](doc/preview02.gif)
 
 1. Enter imgur album url and hit `enter`, and it show the preview.
 2. Click save button for select save folder and then save it.
+
+## Releases
+[Download here](https://github.com/Yukaii/ImgurDownloader/releases)
 
 ## Install
 
